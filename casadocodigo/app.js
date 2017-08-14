@@ -12,10 +12,7 @@ const app = express();
 // Setando o ejs como motor de visualização
 app.set('view engine', 'ejs');
 
-app.get('/produtos', (req, res) => {
-    //res.send('<h1>Listagem de produtos</h1>'); // tirando o HTML do código para ser renderizado pelo EJS
-    res.render('produtos/lista');
-});
+require('./routes/produtos')(app); // não precisa colocar o .js no final, é subentendido pelo node
 
 const server = app.listen(porta, function () {
     console.log(`Servidor executando em http://${ip}:${porta}`);

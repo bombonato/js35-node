@@ -157,5 +157,30 @@ views\produtos\lista.ejs
 </html>
 ```
 
+### Outros frameworks
+
+* Existem frameworks criados como uma camada para o Express, extendendo e incluindo funcionalidades. Como o Sails e Kraken, que usam o Express e extendend com funcionalidades parecidas com o Rails.
+
+### Modulando Rotas
+
+* para expotar uma função de um módulo para outro (de um arquivo para outro) é necessário usar a expressão **module.export**, exemplo:
+
+routes/produtos.js
+```js
+module.exports = function (app) {
+    app.get('/produtos', (req, res) => {
+        res.render('produtos/lista');
+    });
+}
+```
+
+* e usa no principal (app.js) da seguinte forma:
+
+```js
+require('./routes/produtos')(app);
+//ou, usando outra forma equivalete : 
+var produtos = require('./routes/produtos');
+produtos(app);
+```
 
 
