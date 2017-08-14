@@ -12,6 +12,15 @@ Transpila
 * O *Babel* é um dos transpiladores disponíveis
 * Não é compilar pois não gera código de máquina
 
+err - Primeiro Parâmetro
+---
+
+* Em JavaScript existe uma convenção que o primeiro parâmetro de uma função é um erro (err), moldando para que o usuário faça o tratamento deste. Ex.:
+```js
+function(err, result, fields) {
+            res.send(result);
+        });
+```
 
 ## Instalando o Node pelo NVM
 

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/bombonato/js35-node#readme",
   "dependencies": {
     "ejs": "^2.5.7",
-    "express": "^4.15.4"
+    "express": "^4.15.4",
+    "mysql": "^2.14.1"
   }
 }
