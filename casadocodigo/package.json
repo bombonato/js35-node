@@ -1,0 +1,25 @@
+{
+  "name": "casadocodigo",
+  "version": "0.0.1",
+  "description": "JS35-Node - Parte Adminsitrativa do CasaDoCodigo",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bombonato/js35-node.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Fabio Bombonato",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bombonato/js35-node/issues"
+  },
+  "homepage": "https://github.com/bombonato/js35-node#readme",
+  "dependencies": {
+    "express": "^4.15.4"
+  }
+}
