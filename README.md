@@ -163,7 +163,9 @@ views\produtos\lista.ejs
 
 ### Modulando Rotas
 
-* para expotar uma função de um módulo para outro (de um arquivo para outro) é necessário usar a expressão **module.export**, exemplo:
+* Os módulos no JS são singletons
+
+* para expotar uma função de um módulo para outro (de um arquivo para outro) é necessário usar a expressão **module.export**, exemplo mais abaixo.
 
 routes/produtos.js
 ```js
@@ -183,4 +185,16 @@ var produtos = require('./routes/produtos');
 produtos(app);
 ```
 
+* Retirando a parte de listening do app.js para um novo arquivo server.js
 
+server.js
+```js
+const ce = require('./custom-express');
+const app = ce();
+//ou, chamando diretamente:
+const app = require('./custom-express')();
+
+const server = app.listen(porta, function () {
+    console.log(`Servidor executando em http://${ip}:${porta}`);
+});
+```
