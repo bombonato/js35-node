@@ -382,3 +382,74 @@ module.exports = createPool;
 //connection.end();
 ```
 
+## Classes - Heranças, etc
+
+* no JavaScript, temos um modelo de classes, chamada de *Função Construtora* :
+
+```js
+function Produto(paramNome, paramPreco){
+    this.nome = paramNome;
+    this.preco = paramPreco;
+}
+```
+
+* Para adicionarmos um método não existente em uma classe, pode-se utilizar o **prototype** para criar uma função que irá funcionar como herança
+```js
+Produto.prototype.calculaDesconto = function() {
+    return this.preco * 0.1;
+}
+```
+
+* uso da função construtora, instanciação com new
+
+```js
+var produto1 = new Produto('camisa', 35);
+```
+
+* Já no ES2015+ tem suporte a **class**, podendo então reescrever o código como:
+
+```js
+class Produto {
+    constructor(paramNome, paramPreco){
+        this.nome = paramNome;
+        this.preco = paramPreco;
+    }
+
+    calculaDesconto(){
+        return this.preco * 0.1;
+    }
+}
+
+var produto1 = new Produto('camisa', 35);
+```
+
+* Aplicando isso ao projeto, vamos criar um DAO chamado ProdutoDao, deixando os SQL separados e acessíveis ao projeto.
+
+**modelo usando Função Construtora**:
+```js
+function ProdutoDao(connection) {
+    this.connection = connection;
+};
+
+ProdutoDao.prototype.lista = function(callback){
+    this.connection.query('SELECT * FROM livros', callback);
+};
+
+module.exports = ProdutoDao;
+```
+
+**modelo usando Classes do ES2015+**:
+```js
+class ProdutoDao {
+
+    constructor(connection){
+        this.connection = connection;
+    }
+
+    lista(callback) {
+        this.connection.query('SELECT * FROM livros', callback);
+    }
+}
+
+module.exports = ProdutoDao;
+```
