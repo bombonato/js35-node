@@ -1,5 +1,5 @@
 module.exports = function (app) {
-    app.get('/produtos', (req, res) => {
+    app.get('/produtos', (req, res, next) => {
         //res.render('produtos/lista');
 
         const mysql = require('mysql');
@@ -8,15 +8,24 @@ module.exports = function (app) {
             host: 'localhost',
             user: 'root',
             password: '',
-            dataase: 'casadocodigo'
+            datatase: 'casadocodigo'
         });
 
         /*
             O query() é assincrono, precisa criar um função de CallBack
             - fields - array com metainformações sobre os dados/campos
         */
-        connection.query('SELECT * FROM livros', function(err, result, fields) {
-            res.send(result);
+        connection.query('SELECT * FROM livros', function(err, results, fields) {
+            //res.send(result);
+
+            if(err) {
+                console.error(err.stack);
+                next(err);
+                return;
+            }
+            res.render('produtos/lista',{lista:results});
         });
+
+        connection.end();
     });
 }

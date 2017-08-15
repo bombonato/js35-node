@@ -207,3 +207,98 @@ const server = app.listen(porta, function () {
     console.log(`Servidor executando em http://${ip}:${porta}`);
 });
 ```
+
+# Aula 2
+
+## Conceitos
+
+* Normalmente o CSS e Fontes ficam na pasta \public\ do projeto, por convenção. Para que o EJS consiga ler o diretório public, é necessário adicionar no arquivo custom-express.js o seguinte código:
+
+```js
+// Onde ficam os arquivos estáticos (html, fontes, css)
+    app.use(express.static('./public'));
+```
+*obs.:* A função static disponível no módulo do express faz uso da lib serve-stati para possibilitar entrega de arquivos estáticos, integrada com o próprio express.
+
+## BD 
+
+Exibindo produtos na página capturando do BD (MySQL)
+
+* criando BD
+```sql
+create database casadocodigo;
+
+create table livros ( 
+    id int(11) not null auto_increment, 
+    titulo varchar(255) default null, 
+    descricao text, 
+    preco decimal(10,2) default null, 
+    primary key(id) 
+);
+
+INSERT INTO livros(titulo,descricao,preco)
+VALUES('Começando com nodejs', 'Livro introdutorio', 39.90);
+
+INSERT INTO livros(titulo,descricao,preco)
+VALUES('Começando com javascript', 'Livro introdutorio JS', 39.90);
+
+INSERT INTO livros(titulo,descricao,preco)
+VALUES('Começando com express', 'Livro introdutorio Express', 39.90);
+```
+
+* Instalando o mysql para o node
+
+```bash
+npm install mysql --save
+```
+
+* Código da conexão e consulta
+
+routes\produtos.js
+```js
+app.get('/produtos', (req, res, next) => {
+
+        const mysql = require('mysql');
+
+        const connection = mysql.createConnection({
+            host: 'localhost',
+            user: 'root',
+            password: '',
+            datatase: 'casadocodigo'
+        });
+
+        /*
+            O query() é assincrono, precisa criar um função de CallBack
+            - fields - array com metainformações sobre os dados/campos
+        */
+        connection.query('SELECT * FROM livros', function(err, results, fields) {
+            //res.send(result);
+
+            if(err) {
+                console.error(err.stack);
+                next(err);
+                return;
+            }
+            res.render('produtos/lista',{lista:results});
+        });
+
+        connection.end();
+    });
+```
+*obs1.*: veja que **lista** recebe o resultado, que será utilizado no HTML.
+
+*obs2.*: cuidado com os nomes dos parâmetros de DB, caso escritos erronamente dará erros difíceis de encontrar, ex. escreber "datase" em vez de database.
+
+* código do template que irá exibir as informações
+views\produtos\lista.ejs
+```html
+ <tbody>
+    <% for(var i=0; i<lista.length; i++) { %>
+    <tr>
+        <td><%= lista[i].titulo %></td>
+        <td><%= lista[i].preco %></td>
+        <td><p><%= lista[i].descricao %></p></td>
+    </tr>
+    <% } %>
+</tbody>
+```
