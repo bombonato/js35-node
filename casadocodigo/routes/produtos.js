@@ -1,16 +1,12 @@
+const connectionFactory = require('../infra/connectionFactory');
+
 module.exports = function (app) {
     app.get('/produtos', (req, res, next) => {
         //res.render('produtos/lista');
 
-        const mysql = require('mysql');
-
-        const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            datatase: 'casadocodigo'
-        });
-
+        
+        //const connection = connectionFactory();
+        const connection = connectionFactory();
         /*
             O query() é assincrono, precisa criar um função de CallBack
             - fields - array com metainformações sobre os dados/campos
@@ -26,6 +22,6 @@ module.exports = function (app) {
             res.render('produtos/lista',{lista:results});
         });
 
-        connection.end();
+        //connection.end(); // Retira devido ao uso Pool
     });
 }

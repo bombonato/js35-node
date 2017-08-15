@@ -1,6 +1,17 @@
 # JS35-Node.js
 Aplicações Web em JavaScript com Node.JS e Express
 
+
+# Links
+
+[Definições(Types) do VSCode](https://microsoft.github.io/TypeSearch/)
+* utilizada para o AutoComplete do VSCode
+* O pessoal da Microsoft pega bibliotecas JavaScript de FronteEnde, Node, etc e faz interfaces e pegando os .ts destas interfaces
+* Ele internamente também usa o [DefinitelyTyped](http://definitelytyped.org/)
+
+[mysqljs - Driver Conexão MySQL para JS](https://github.com/mysqljs/mysql)
+* Ver mais sobre o sistema de [Pool](https://github.com/mysqljs/mysql#pool-options), função createPool()
+
 # Aula 1
 
 ## Conceitos
@@ -220,6 +231,8 @@ const server = app.listen(porta, function () {
 ```
 *obs.:* A função static disponível no módulo do express faz uso da lib serve-stati para possibilitar entrega de arquivos estáticos, integrada com o próprio express.
 
+* Um lema: "*Copiou - Colou - Isolou*". Isso pode ser aplicado para isolar a conexão ao BD, podendo ser reutilizada em diversos locais do código.
+
 ## BD 
 
 Exibindo produtos na página capturando do BD (MySQL)
@@ -287,7 +300,9 @@ app.get('/produtos', (req, res, next) => {
 ```
 *obs1.*: veja que **lista** recebe o resultado, que será utilizado no HTML.
 
-*obs2.*: cuidado com os nomes dos parâmetros de DB, caso escritos erronamente dará erros difíceis de encontrar, ex. escreber "datase" em vez de database.
+*obs2.*: cuidado com os nomes dos parâmetros de DB, caso escritos erronamente dará erros difíceis de encontrar, ex. escreber "datase" em vez de database. Detalhe que ele está fora do query(), mesmo assim ele espera a finalização para então encerrar. Se quiser encerrar de imediato, precisaria usar **connection.destroy()**.
+
+*obs3.*: o *connection.end()* faz com que a conexão feche, pode ser verificada no MySQL console com o comando **show processlist;**
 
 * código do template que irá exibir as informações
 views\produtos\lista.ejs
@@ -302,3 +317,68 @@ views\produtos\lista.ejs
     <% } %>
 </tbody>
 ```
+
+### Isolando Conexão BD
+
+infra\connectionFactory.js
+
+```js
+const mysql = require('mysql');
+
+function createConnection() {
+    return mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        datatase: 'casadocodigo'
+    });
+}
+
+module.exports = createConnection;
+```
+**importante**: perceba que *module.exports* é singleton, não seria possível no caso retornar uma variável da conexão, pois se assim fosse, ele iria criar uma única conexão para todo o sistema, logo ao usá-la em querys() e depois dar um .end() ela fecharia a conexão para sempre. Logo, o melhor é retornar como função, pois no caso reornará como referência (parecido com o & do C++) a função e ainda não será chamada. Só no momento que precisar ele executa e finaliza quando necessário. Externamente ao receber/usar é como função "()" ao chamar o connectionFactory, exemplo:
+```js
+const connectionFactory = require('../infra/connectionFactory');
+
+ const connection = connectionFactory();
+```
+
+* Continuando, para usar a conexão, usa-se:
+
+```js
+const connectionFactory = require('../infra/connectionFactory');
+
+module.exports = function (app) {
+    app.get('/produtos', (req, res, next) => {
+
+        const connection = connectionFactory();
+
+        connection.query('SELECT * FROM livros', function(err, results, fields) {
+        ...
+```
+
+### Sistema de Pool
+
+* Para usar o sistema de Pool, basta usar o método createPool() que adiciona algumas [opções](https://github.com/mysqljs/mysql#pool-options) a mais
+```js
+function createPool() {
+    //return mysql.createConnectionPool({
+    return mysql.createPool({
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'casadocodigo',
+        connectionLimit: 10, // padrao sem colocar é 10
+        queueLimit: 0,
+        acquireTimeout: 10000
+    });
+}
+
+module.exports = createPool;
+```
+
+* Deve retirar o end() ao utilizar o Pool
+```js
+//connection.end();
+```
+
