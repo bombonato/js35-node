@@ -1,5 +1,5 @@
-const connectionFactory = require('../infra/connectionFactory');
-const ProdutoDao = require('../infra/ProdutoDao');
+// const connectionFactory = require('../infra/connectionFactory');
+// const ProdutoDao = require('../infra/ProdutoDao');
 
 module.exports = function (app) {
     app.get('/produtos', (req, res, next) => {
@@ -7,9 +7,9 @@ module.exports = function (app) {
 
         
         //const connection = connectionFactory();
-        const connection = connectionFactory();
+        const connection = app.infra.connectionFactory();
         
-        const produtoDao = new ProdutoDao(connection);
+        const produtoDao = new app.infra.ProdutoDao(connection);
 
         produtoDao.lista((err, results, fields) => {
 

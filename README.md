@@ -453,3 +453,41 @@ class ProdutoDao {
 
 module.exports = ProdutoDao;
 ```
+
+## Carregador de Módulos automático
+
+* O Express tem um módulo para carregamento automático, chamado **Express-Load**
+
+```bash
+npm install express-load --save
+```
+*obs.*: não usa o "-g", pois é da sua aplicação, não de linha de comando
+
+A criação de módulos muda 
+
+DE
+```js
+require('./routes/produtos')(app);
+```
+PARA
+```js
+    // Usando o módulo Express-Load
+    load('routes') // carregar os módulos do diretório routes
+        .then('infra') // tb carregar os modulos do diretório infra
+        .into(app); // var app contém o objeto do express.
+```
+
+Como não utiliza mais o require, o produtos.js muda para o código abaixo, sendo que o **app** tem acesso ao módulo importando *infra*, podendo fazer o acesso da seguinte forma:
+```js
+const connection = app.infra.connectionFactory();
+        
+const produtoDao = new app.infra.ProdutoDao(connection);
+```
+
+Para completar, é precisa mudar tanto o ProdutoDao quanto o connectionFactory para ao exportar fazer como função, caso contrário irã instanciar somente uma única vez. Esse recurso chama-se *função wrapper*:
+
+```js
+module.exports = function () {
+    return ProdutoDao
+}
+```

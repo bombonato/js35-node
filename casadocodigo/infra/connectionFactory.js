@@ -13,4 +13,7 @@ function createPool() {
     });
 }
 
-module.exports = createPool;
+//module.exports = createPool;
+module.exports =  function () {
+    return createPool;
+}
