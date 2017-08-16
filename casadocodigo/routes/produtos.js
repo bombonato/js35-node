@@ -47,7 +47,8 @@ module.exports = function (app) {
                 return;
             }
 
-            res.render('produtos/salvo');
+            //res.render('produtos/salvo');
+            res.redirect('/produtos');
         });
 
     });

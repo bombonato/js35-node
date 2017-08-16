@@ -505,6 +505,8 @@ module.exports = function () {
 
 * Nome de variáveis em javascript não pode ter "-", pode ter $, A-za-z e 0-9.
 
+
+
 ## Formulário
 
 Instalar o **body-parser** para ler o *req.body* com os dados do formulário.
@@ -573,3 +575,19 @@ E criando o Salvar no DAO
         this.connection.query('INSERT INTO livros SET ?', produto, callback)
     }
 ```
+
+### Redirect
+
+A função *redirect* indica par ao express que em vez de simplesmente fazer um forward, é necessário que ele retorne o status 302 para o navegador, solicitando que o mesmo faça um novo request para o novo endereço.
+ Essa técinica, fazer um redirect do lado do cliente logo após um post, ẽ um padrão conhecido da web chamado de **Always Redirect After Post**. Deve ser sempre utilizando quando o cliente é uma pessoa usando um navegador
+
+\routes\produtos.js
+ ```js
+app.post('/produtos', (req,res) => {
+        ...
+        produtoDao.salva(produto, (err, results) => {
+            res.redirect('/produtos');
+        });
+    });
+ ```
+
