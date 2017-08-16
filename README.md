@@ -491,3 +491,85 @@ module.exports = function () {
     return ProdutoDao
 }
 ```
+
+
+# Aula 3
+
+## Conceitos
+
+* Arquivos na pasta **views** não são acessíveis diretamente por nenhum cliente. Não é possível fazer: http://localhost:3000/views/produtos/form.ejs
+
+* Todas as informações que são enviadas em uma requisição estão disponíveis na variãvel *req*. Já a propriedade *body* da req retorna os dados preenchidos no formulário de cadastro. Contudo no **express** ao acessar o *req.body* recebemos *undefined*, pois antes de usá-lo é necessário instalar o módulo **body-parser** que altera a estrutura do objeto que representa o request, justamente adicionando essa propriedade. Com o body-parser o Express consegue transformar em objeto javascript para ser tratado.
+
+* o node por padrão usa só 1 thread. Ao subir o executável do servidor node ele sobe só 1 thread. Existem bibliotecas para gerenciamento de processos, tais como PM2, StrongLoopPM, etc. Em situações que usam muita cpu (I/O Bound, CPU Bound, Gzip) o node sozinho não é bom. Normalmente para escalonar se usa um servidor na frente (ex. NGINX) que distribui para vários servidores Node, inclusive podendo deixar o servidor web nginx servir as partes estáticas (html, css, etc).
+
+* Nome de variáveis em javascript não pode ter "-", pode ter $, A-za-z e 0-9.
+
+## Formulário
+
+Instalar o **body-parser** para ler o *req.body* com os dados do formulário.
+
+```bash
+npm install body-parser --save
+```
+
+Também é preciso ensinar ao *express* a usar o **body-parser** para recuperar os parâmetros enviados na requisição e deixar disponível na propriedade **body**.
+
+\custom-express.js
+```js
+const bodyParser = require('body-parser');
+
+module.exports = function () {
+    const app = express();
+
+    // ensinando o Express a recuperar os parâmetros da requisição req
+    // e deixar disponível na propriedade body
+    app.use(bodyParser.urlencoded());
+``` 
+Para obter o formulário é feito um GET no formulário, já para mandar os dados para inserir é feito um POST em produtos:
+
+obter o Formulário para ser preenchido
+* GET  localhost:3000/produtos/form (recuperar formulário)
+
+enviar os dados do fomulário para gravação
+* POST localhost:3000/produtos (salvar dados)
+* além de enviar os parâmetros: titulo, preco e descricao
+
+Criando a Rota
+
+```js
+// Obter o Formulário (GET)
+    app.get('/produtos/form', (req,res) => {
+        // busca o template eps do formulário em view
+        res.render('produtos/form'); 
+    });
+
+    // Salvar os Dados do formulário (POST)
+    app.post('/produtos', (req,res) => {
+        const produto = req.body; // acessível devido a lib body-parser
+
+        const connection = app.infra.connectionFactory();
+        
+        const produtoDao = new app.infra.ProdutoDao(connection);
+
+        produtoDao.salva(produto, (err, results) => {
+
+            if(err) {
+                console.error(err.stack);
+                next(err);
+                return;
+            }
+
+            res.render('produtos/salvo');
+        });
+
+    });
+```
+
+E criando o Salvar no DAO
+
+```js
+ salva(produto, callback) {
+        this.connection.query('INSERT INTO livros SET ?', produto, callback)
+    }
+```

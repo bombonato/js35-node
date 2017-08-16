@@ -17,6 +17,10 @@ class ProdutoDao {
     lista(callback) {
         this.connection.query('SELECT * FROM livros', callback);
     }
+
+    salva(produto, callback) {
+        this.connection.query('INSERT INTO livros SET ?', produto, callback)
+    }
 }
 
 // module.exports = ProdutoDao;
