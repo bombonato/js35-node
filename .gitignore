@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# MySQL
+mysql/mysql-data/*
+
+# MacOS
+.DS_Store

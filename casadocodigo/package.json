@@ -20,8 +20,11 @@
   },
   "homepage": "https://github.com/bombonato/js35-node#readme",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
+    "express-load": "^1.1.16",
+    "express-validator": "^3.2.1",
     "mysql": "^2.14.1"
   }
 }
