@@ -19,7 +19,18 @@ module.exports = function (app) {
                 return;
             }
 
-            res.render('produtos/lista',{lista:results});
+            res.format({
+                html: () => {
+                    res.render('produtos/lista',{lista:results});
+                },
+                json: () => {
+                    res.json(results);
+                },
+                default:  () => {
+                    res.status(406).send('No acceptable');
+                },
+            });
+
         });
 
         //connection.end(); // Retira devido ao uso Pool

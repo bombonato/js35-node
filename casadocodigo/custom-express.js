@@ -10,7 +10,10 @@ module.exports = function () {
 
     // ensinando o Express a recuperar os parâmetros da requisição req
     // e deixar disponível na propriedade body
-    app.use(bodyParser.urlencoded());
+    //app.use(bodyParser.urlencoded());
+    // Adicionando suporte a JSON no body
+    app.use(bodyParser.urlencoded({extended: true}));
+    app.use(bodyParser.json());
 
     // Setando o ejs como motor de visualização/Template
     app.set('view engine', 'ejs');

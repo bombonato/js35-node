@@ -505,7 +505,7 @@ module.exports = function () {
 
 * Nome de variáveis em javascript não pode ter "-", pode ter $, A-za-z e 0-9.
 
-
+* Todas as operações dentro do Node são feitas de maneira assíncrona, as bibliotecas contruídas em cima da plataforma funcionam em cima do modelo assíncrono imposto por ele. As operações são feitas de maneira não blocando e quando estiver pronta/finalizada o *callback* é chamado. Dessa maneira, a mesma Thread rodando no Noje.js consegue atender um número maior de requisições, deixando a aplicação mais fãcil de escalar em cenários de muitos requests. A diferença é tão absurda que, por padrão, o Node.js funciona apenas com *uma* thread.
 
 ## Formulário
 
@@ -591,3 +591,57 @@ app.post('/produtos', (req,res) => {
     });
  ```
 
+## Formato de Resposta
+
+Trata sobre permitir que seja respondido no formato desejado pelo usuário/cliente (ex. HTML, JSON, etc).
+
+### Content Negotiation
+
+* também chamado de *Content Type Negotiation*
+
+Esta técnica é feita através do cabeçalho *Accept* , indicando o formato que queremos, muito utilizada em integrações baseadas no HTTP (como REST).
+
+```bash
+curl -H "Accept: application/json" http://localhost:3000/produtos
+
+curl -H "Accept: text/html" http://localhost:3000/
+```
+
+No *express* o suporte é feito pela função **format()** que baseado no cabeçalho *Accept* da requisição ele decide o que usar
+
+* o **res.render()** por padrão já manda no formato *text/html*. Será trocado o render() por format() especificando os formatos desejados.
+
+routes\produtos.js
+```js
+app.get('/produtos', (req, res, next) => {
+        ...
+        produtoDao.lista((err, results, fields) => {
+
+            res.format({
+                html: () => {
+                    res.render('produtos/lista',{lista:results});
+                },
+                json: () => {
+                    res.json(results);
+                }
+            });
+
+        });
+```
+
+Para a parte de Formulário, também é possível interferir no formato de envio. Quando prrenchido numa página web o formulário e enviado no formato *x-www-form-urlencoded*.
+
+\custom-express.js
+```js
+    app.use(bodyParser.urlencoded({extended: true}));
+    app.use(bodyParser.json());
+```
+
+Mandando o envio de dados pelo formulário por curl, configurando o content-type para *application/json* no método *POST*:
+
+```bash
+curl -H "Content-type: application/json" \
+-X POST \
+-d '{"titulo":"Curl","preco":102,"descricao":"Detalhes sobre uso do Curl"}' \
+http://localhost:3000/produtos
+```
