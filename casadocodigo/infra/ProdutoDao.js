@@ -19,8 +19,12 @@ class ProdutoDao {
     }
 
     salva(produto, callback) {
-        this.connection.query('INSERT INTO livros SET ?', produto, callback)
+        this.connection.query('INSERT INTO livros SET ?', produto, callback);
     }
+
+    /* limpaLivros(produto, callback) {
+        this.connection.query('DELETE FROM livros');
+    } */
 }
 
 // module.exports = ProdutoDao;

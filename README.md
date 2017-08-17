@@ -843,3 +843,76 @@ há erros de validação!
   4 passing (146ms)
 ```
 
+### Criando BD de testes
+
+É interessante que o banco de dados de test seja difernete do banco usado (dsv, prd, etc), pois será inserido dados, apagado e outras operações que podem sujar a base. Para tal, uma abordagem é reconfigurar outro BD e passar uma variável de ambiente ao rodar os testes.
+
+Criando BD de Testes:
+```bash
+mysqladmin -u root -p create casadocodigo_teste
+
+mysqldump -u root -p casadocodigo > cdc.sql
+
+mysql -u root -p casadocodigo_teste < cdc.sql
+```
+
+No código de configuração da conexão com o BD é preciso diferenciar entre ambientes para que seja carregado o banco de dados correto
+
+\infra\connectionFactory.js
+```js
+function createPool() {
+
+    let databaseName = 'casadocodigo';
+
+    if(process.env.NODE_ENV == 'test') {
+        databaseName = 'casadocodigo_teste';
+    }
+
+    return mysql.createPool({
+        database: databaseName,
+
+```
+*obs.*: usar o **process.env** dá acesso ao processo do Node e as variáveis de ambiente (env) carregadas.
+
+Ao chamar os testes, executar passando a variável de ambiente **NODE_ENV=test**.
+
+```bash
+ NODE_ENV=test mocha --recursive --watch
+```
+
+### Limpando BD
+
+Para testes é interessante limpar o banco ande de executá-los, para não influenciar nos testes.
+
+```bash
+npm install database-cleaner --save-dev
+```
+
+No código, configurar o driver do bd utilizado e passar o clean() em cima da conexão realizada
+
+```js
+const app = require('../../custom-express')();
+const supertest = require('supertest');
+const request = supertest(app);
+const DatabaseCleaner = require('database-cleaner');
+
+describe('product route', () => {
+
+    beforeEach( (done) => { 
+        var dbCleaner = new DatabaseCleaner('mysql');
+        dbCleaner.clean(app.infra.connectionFactory(), done);
+    });
+
+    after( (done) => {
+        var dbCleaner = new DatabaseCleaner('mysql');
+        dbCleaner.clean(app.infra.connectionFactory(), done);
+    });
+
+    it('
+    ...
+```
+Possibilidades de momentos de 
+
+* before: rode um código ants de todos os testes
+* after: rode um código depois de todos os testes
+* afterEach: rode um código depois de cada teste

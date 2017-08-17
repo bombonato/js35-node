@@ -1,8 +1,20 @@
 const app = require('../../custom-express')();
 const supertest = require('supertest');
 const request = supertest(app);
+const DatabaseCleaner = require('database-cleaner');
 
 describe('product route', () => {
+
+    beforeEach( (done) => { 
+        var dbCleaner = new DatabaseCleaner('mysql');
+        dbCleaner.clean(app.infra.connectionFactory(), done);
+    });
+
+    after( (done) => {
+        var dbCleaner = new DatabaseCleaner('mysql');
+        dbCleaner.clean(app.infra.connectionFactory(), done);
+    });
+
     it('should list products', (done) => {
         request.get('/produtos')
             .set('Accept', 'application/json')
