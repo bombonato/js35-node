@@ -721,3 +721,125 @@ E na página do Form adicionamos um local para exibir erros de validação
 
 ```
 *obs.*: se utilizar a variável *validationErros*, obtida a partir do parâmetro format() html da rota produtos.js, será apresentado um erro, pois o Form ao inserir um novo livro o Form está limpo/vazio, logo não passou pela validação e esta variável encontra-se *undefined*. Mas ao acessar através de **locals** é realizado o tratamento adequado evitando erros no momento que ainda está *undefinied*.
+
+# Aula 4
+
+## Conceitos
+
+* *assert* já vem no Node.js. Não é uma palavra reservada do JavaScript, é retornada como objeto (não precisa usá-la como função)
+
+* Testes envolvendo várias camadas da nossa aplicação (bd, express, validadores), são testes que usam várias partes do projeto, é conhecido como **Teste de Integração**. Usado para verificar se todas as partes do sistema estão funcionando em conjunto.
+
+* Testes envolvendo lógica mais complicada, isolada em uma função, apenas de um trecho, são conhecidos como **Teste de Unidade**, envolvem mais regras de negócio.
+
+* Testes com uma especificação é conhecido como BDD. Algo como *describe(...)... it('should ...')*, exemplo:
+
+```js
+const http = require('http');
+const assert = require('assert');
+describe('Product route', () => {
+    // it - descrição de um cenário
+    it('should list products', (done) => {
+// ARRANGE
+        const configuracoes = {
+            hostname: 'localhost',
+            port: 3000,
+            path: '/produtos',
+            headers: { Accept: 'application/json'}
+        }
+// ACT
+        http.get(configuracoes, (res) => {
+// ASSERT
+            // faz as verificações que quer
+            assert.equal(res.statusCode, 200);
+            assert.equal(res.headers['Content-type'], 'application/json; charset=utf-8');
+            done();
+        });
+    });
+});
+```
+obs.: Maneira crua de fazer o teste, usando o cliente e não com recursos do servidor (node/express), visto em seguida.
+
+## Testes
+
+* Mocha e Supertest
+
+* O **Supertest** facilita com a configuração necessária do http, já passando a aplicação realizada do Express, não precisando reconfigurar tudo novamente. Além de pertitir usar o módulo ao invés de usar diretamente a API sobre o HTTP fornecida pelo Node.js. Outras vantagens
+    * Não precisar criar o JSON de configuração para fazer a requisição
+    * As asserções baseadas no response já estão encapsuladas em funções
+    * Diminuimos o número de funções anônimas necessárias.
+    * Integração com o Mocha já aeitando como argumento a função de finalizações passada pelo Mocha (função *done*)
+
+```bash
+npm install mocha --save-dev -g
+
+npm install supertest --save-dev
+```
+*obs.*: usa o "save-dev" pois será só usando em desenvolvimento, não em produção.
+
+```bash
+$ mocha // roda o mocha
+
+$ mocha --recursive // procura na pasta test para dentro recursivamente
+ou
+$ mocha -p test/routes // executar os testes de routes
+
+$ mocha --watch // para ficar vendo alterações e rodar
+```
+
+\test\routes\produtos.js
+```js
+const app = require('../../custom-express')();
+const supertest = require('supertest');
+const request = supertest(app);
+
+describe('product route', function() {
+    it('should list products', function (done) {
+        request.get('/produtos')
+            .set('Accept', 'application/json')
+            .expect('Content-Type',/json/) //regex
+            .expect(200, done);
+    });
+
+    it('should list products in html', function(done) {
+        request.get('/produtos')
+            .expect('Content-Type',/html/) //regex
+            .expect(200, done);
+    });
+
+    it('deve ter livro cadastrado válido', (done) => {
+        request.post('/produtos')
+            .send({
+                titulo:'Cangaceiro JS',
+                preco: 29
+                })
+            .expect('Location','/produtos')
+            .expect(302, done);
+    });
+
+    it('deve ter livro cadastrado inválido', (done) => {
+        request.post('/produtos')
+            .send({
+                preco: 29 // pelo validador, vai faltar o Titulo
+                })
+            .expect(400, done);
+    });
+});
+```
+
+Chamar o Mocha recursivamente e sempre ativo:
+```bash
+$ mocha --recursive --watch
+```
+Resultado
+```text
+product route
+    ✓ should list products (39ms)
+    ✓ should list products in html
+    ✓ deve ter livro cadastrado válido (68ms)
+há erros de validação!
+    ✓ deve ter livro cadastrado inválido
+
+  4 passing (146ms)
+```
+
