@@ -726,6 +726,13 @@ E na página do Form adicionamos um local para exibir erros de validação
 
 ## Conceitos
 
+* Para exportar um objeto no Node basta usar o "{ }", ex.:
+```js
+module.exports = {
+    limpa: efetuaLimpeza
+}
+```
+
 * *assert* já vem no Node.js. Não é uma palavra reservada do JavaScript, é retornada como objeto (não precisa usá-la como função)
 
 * Testes envolvendo várias camadas da nossa aplicação (bd, express, validadores), são testes que usam várias partes do projeto, é conhecido como **Teste de Integração**. Usado para verificar se todas as partes do sistema estão funcionando em conjunto.
@@ -911,8 +918,10 @@ describe('product route', () => {
     it('
     ...
 ```
-Possibilidades de momentos de 
+Possibilidades de momentos, em ordem de precedência:
 
 * before: rode um código ants de todos os testes
-* after: rode um código depois de todos os testes
+* beforeEach: roda um código antes de cada teste
 * afterEach: rode um código depois de cada teste
+* after: rode um código depois de todos os testes
+
