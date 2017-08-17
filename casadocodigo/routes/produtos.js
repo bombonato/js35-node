@@ -28,6 +28,7 @@ module.exports = function (app) {
                 },
                 default:  () => {
                     res.status(406).send('No acceptable');
+                    return;
                 },
             });
 
@@ -49,6 +50,30 @@ module.exports = function (app) {
         const connection = app.infra.connectionFactory();
         
         const produtoDao = new app.infra.ProdutoDao(connection);
+
+        // Validação
+        req.assert('titulo', 'Título deve ser preenchido').notEmpty();
+        req.assert('preco', 'Preço deve ser um número').isFloat();
+        const errosValidacao = req.validationErrors();
+        //const errosValidacao = req.getValidationResult();
+        
+        // Redirecionar em caso de erros na validação
+        if(errosValidacao) {
+            console.log('há erros de validação!');
+            res.format({
+                html: () => {
+                    res.status(400).render('produtos/form',
+                    { validationErrors: errosValidacao });
+                },
+                json: () => {
+                    res.status(400).send(errosValidacao);
+                },
+                default:  () => {
+                    res.status(400).send(errosValidacao);
+                },
+            });
+            return;
+        }
 
         produtoDao.salva(produto, (err, results) => {
 

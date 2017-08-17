@@ -645,3 +645,79 @@ curl -H "Content-type: application/json" \
 -d '{"titulo":"Curl","preco":102,"descricao":"Detalhes sobre uso do Curl"}' \
 http://localhost:3000/produtos
 ```
+
+## Validação Status HTTP
+
+Para realizar validações, pode-se utilizar do módulo **express-validator**
+
+```bash
+npm install express-validator --save
+```
+
+Instalado o módulo é preciso carregá-lo no express
+
+\custom-express.js
+```js
+const expressValidator = require('express-validator');
+
+// Suporte a Validação dos status http
+app.use(expressValidator());
+```
+
+Carregado o suporte a validação, segue o código para realizar a validação em si:
+
+\routes\produtos.js
+```js
+...
+app.post('/produtos', (req,res) => {
+        
+        // Validação
+        req.assert('titulo', 'Título deve ser preenchido').notEmpty();
+        req.assert('preco', 'Preço deve ser um número').isFloat();
+        const errosValidacao = req.validationErrors();
+        
+        // Redirecionar em caso de erros na validação
+        if(errosValidacao) {
+            console.log('há erros de validação!');
+            res.format({
+                html: () => {
+                    res.status(400).render('produtos/form',
+                    { validationErrors: errosValidacao });
+                },
+                json: () => {
+                    res.status(400).send(errosValidacao);
+                },
+                default:  () => {
+                    res.status(400).send(errosValidacao);
+                },
+            });
+            return;
+        }
+
+        produtoDao.salva(produto, (err, results) => {
+        ...
+```
+
+* Ao utilizar o *express-validator* é adicionado ao request algumas novas funções. Tais como o *assert()* e *erros()*. A primeira retorna um objeto cujo tipo é **ValidatorChain**, internamente ele usa o módulo chamado *validator*. Já o segundo adiciona no request para possibilitar a recuperação dos erros gerados.
+
+
+E na página do Form adicionamos um local para exibir erros de validação
+
+\views\produtos\form.ejs
+```html
+...
+        <% if(locals.validationErrors) { %>
+            <ul class="list-unstyled">
+                <% for(var i=0; i < validationErrors.length; i++) { %>
+                    <li class="alert alert-danger">
+                        <%= validationErrors[i].msg %>
+                    </li>
+                <% } %>
+            </ul>
+        <% } %>
+
+        <form action="/produtos" method="post" class="well" role="form">
+...
+
+```
+*obs.*: se utilizar a variável *validationErros*, obtida a partir do parâmetro format() html da rota produtos.js, será apresentado um erro, pois o Form ao inserir um novo livro o Form está limpo/vazio, logo não passou pela validação e esta variável encontra-se *undefined*. Mas ao acessar através de **locals** é realizado o tratamento adequado evitando erros no momento que ainda está *undefinied*.
