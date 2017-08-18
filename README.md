@@ -929,12 +929,14 @@ Possibilidades de momentos, em ordem de precedência:
 
 ## Conceitos
 
-* O WebSocket veio depois do ServerSideEvents, faz o que ele faz com mais recursos. Enquanto o http é mias sobre texto, já o WebSocket é binário, fullduplex. Deixar a conexão aberta - Long Polling - podendo o servidor enviar informações para o cliente, sem a necessidade de uma nova requisição.
+* O **WebSocket** veio depois do ServerSideEvents, faz o que ele faz com mais recursos. Enquanto o http é mias sobre texto, já o WebSocket é binário, fullduplex. Deixar a conexão aberta - Long Polling - podendo o servidor enviar informações para o cliente, sem a necessidade de uma nova requisição.
 
     * Além do servidor poder notificar o cliente, o cliente também pode enviar informações para o servidor
     * A comunicação é feita baseada em um novo protocolo, especĩfico para o WebSocket
     * API padrão para ser usada dentro do navegador, ao invés de ficar simulando requisição AJAX.
     * Suporte a partir do Chrome 16+ (out/2011), Firefox 11+ (jan/2012), IE10+ (set/2012)
+
+* **Midleware** - O express segue um conceito de ser um servidor minimalista. Com o método use(), são adicionadas funcionalidades a nossa aplicação. Para o express ele é algo bem simples, seria algo que trabalha com um request antes de chegar nas rotas, ou seja, são interceptors que ficam entre o Express em si mas antes de chegar na Rota, adicionando verificações e comportamentos sobre ele. O momento que ela vai ser executada depende de onde você invocar. 
 
 ## WebSockets
 
@@ -1016,4 +1018,26 @@ Por fim, na página que vai receber as notificações, é preciso importar o soc
 </script>
 </body>
 </html>
+```
+
+## Midleware
+
+\custom-express.js
+
+```js
+    // Página não encontrada (404)
+    // Detalhe que ele identifica que a página não
+    // foi encontrada pela qtde de parâmetros: 3
+    app.use( function(req, res, next) {
+        res.status(404).render('erros/404');
+    });
+
+    // Erro Interno do Servidor (500)
+    // A diferença está nos parâmetros, com 4 param temos o
+    // error, que representa casos com erro no servidor
+    app.use( (error, req, res, next) => {
+        console.error('Erro no middleware');
+        console.error(error);
+        res.status(500).render('erros/500');
+    });
 ```

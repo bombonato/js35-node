@@ -29,5 +29,21 @@ module.exports = function () {
         .then('infra') // tb carregar os modulos do diretório infra
         .into(app); // var app contém o objeto do express.
 
+    // Página não encontrada (404)
+    // Detalhe que ele identifica que a página não
+    // foi encontrada pela qtde de parâmetros: 3
+    app.use( function(req, res, next) {
+        res.status(404).render('erros/404');
+    });
+
+    // Erro Interno do Servidor (500)
+    // A diferença está nos parâmetros, com 4 param temos o
+    // error, que representa casos com erro no servidor
+    app.use( (error, req, res, next) => {
+        console.error('Erro no middleware');
+        console.error(error);
+        res.status(500).render('erros/500');
+    });
+
     return app; // retorna o template e rotas configuradas;
 }
