@@ -925,3 +925,95 @@ Possibilidades de momentos, em ordem de precedência:
 * afterEach: rode um código depois de cada teste
 * after: rode um código depois de todos os testes
 
+# Aula 5
+
+## Conceitos
+
+* O WebSocket veio depois do ServerSideEvents, faz o que ele faz com mais recursos. Enquanto o http é mias sobre texto, já o WebSocket é binário, fullduplex. Deixar a conexão aberta - Long Polling - podendo o servidor enviar informações para o cliente, sem a necessidade de uma nova requisição.
+
+    * Além do servidor poder notificar o cliente, o cliente também pode enviar informações para o servidor
+    * A comunicação é feita baseada em um novo protocolo, especĩfico para o WebSocket
+    * API padrão para ser usada dentro do navegador, ao invés de ficar simulando requisição AJAX.
+    * Suporte a partir do Chrome 16+ (out/2011), Firefox 11+ (jan/2012), IE10+ (set/2012)
+
+## WebSockets
+
+Instlar o suporte a WebSocket: socket.io
+
+```bash
+ npm install socket.io --save
+```
+
+Mudar o servidor para carregar e funcionar com o WebSocket
+
+server.js
+```js
+const app = require('./custom-express')();
+
+const http = require('http').Server(app); //para poder criar o websockert
+const io = require('socket.io')(http); //para usar o websocket
+// seta chave-valor, permite pegar o io na rota promocoes
+app.set('io', io); 
+
+//app.listen(porta, () => { // substitui por http, permitindo o uso do WebSocket
+http.listen(porta, () => {
+    console.log(`Servidor executando em http://${ip}:${porta}`);
+});
+```
+
+Cria um formulário só para poder enviar os dados para a página principal, mas ainda não é o evento, este formulário será recebido na rota promocoes.js, e lá sim será recebido os dados do formulário para montar o envento e enviar os dados
+
+views\promocoes\form.ejs
+```html
+    <form action="/promocoes" method="post">
+        <div>
+            <input type="text" name="mensagem" id="mensagem">
+        </div>
+        <div>
+            <select name="livro[titulo]">
+                <% lista.forEach((livro) => { %>
+                    <option value="<%= livro.titulo %>"><%= livro.titulo %></option>
+                <% }); %> 
+            </select>
+        </div>
+        <input type="submit" value="Promoções relâmpago">
+    </form>
+```
+
+Envia um Evento usando o socket.io. No caso, ao definir uma promoção em uma possível página adminsitrativa será enviado um evento em "tempo-real" para os usuários que estão interagindo na página principal:
+
+routes\promocoes.js
+```js
+    ...
+    app.post('/promocoes', (req, res, next) => {
+        const promocao = req.body;
+
+        app.get('io').emit('novaPromocao', promocao);
+
+        res.redirect('/promocoes/form')
+    });
+```
+*obs.1*: disparando o WebSocket, para avisar os navegadores que estão na página principal
+
+*obs.2*: "io" foi setado em server.js, obtem o acesso a instância do io
+
+*obs.3*: "novaPromocao" é a tag do evento, será capturado na pagina principal: index.ejs
+
+Por fim, na página que vai receber as notificações, é preciso importar o socket.io e configurar o recebimento do Evento emitido em promocoes.js
+
+\views\home\index.eps
+```html
+...
+</footer>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    socket.on('novaPromocao', (dados) => {
+        console.log('Nova promoção!');
+        console.log(dados);
+        alert('Nova promoção! É para acabar: ' + dados.mensagem);
+    });
+</script>
+</body>
+</html>
+```

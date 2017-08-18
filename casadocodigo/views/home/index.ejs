@@ -240,6 +240,15 @@
         </div>
     </div>
 </footer>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    socket.on('novaPromocao', (dados) => {
+        console.log('Nova promoção!');
+        console.log(dados);
+        alert('Nova promoção! É para acabar: ' + dados.mensagem);
+    });
+</script>
 </body>
 </html>
 
